@@ -16,7 +16,7 @@ const Login = () => {
         const form = event.currentTarget;
 
         event.preventDefault();
-        
+
         if (form.checkValidity() === false) {
             event.stopPropagation();
         }
@@ -59,8 +59,8 @@ const Login = () => {
                     <Card.Title className="h1 text-center">Sign In</Card.Title>
 
                     {alert &&
-                        <Alert variant="danger" onClick={()=>setAlert(false)} dismissible>
-                            Your Email or Password is Invalid!
+                        <Alert variant="danger" onClick={() => setAlert(false)} dismissible>
+                            <b>Your Email or Password is Invalid!</b>
                         </Alert>
                     }
 

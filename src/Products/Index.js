@@ -1,13 +1,17 @@
 import { Button, Table, ButtonGroup } from 'react-bootstrap';
+import Alert from 'react-bootstrap/Alert'
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import Navigation from "../Navigation";
+import { confirmAlert } from 'react-confirm-alert'; // Import
+import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
 
 const Index = (props) => {
 
     const [products, setProducts] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [alert, setAlert] = useState(false);
     const userName = props.userName;
 
     const getData = () => {
@@ -64,7 +68,25 @@ const Index = (props) => {
             .then((res) => {
                 console.log(res);
                 getData();
+                setAlert(true);
             })
+    }
+
+    const showAlert = (productId) => {
+        confirmAlert({
+            title: 'Delete Confirm',
+            message: 'Are you sure?',
+            buttons: [
+                {
+                    label: 'Yes',
+                    onClick: () => handleDelete(productId)
+                },
+                {
+                    label: 'No',
+                    onClick: () => ''
+                }
+            ]
+        });
     }
 
     return (
@@ -78,6 +100,12 @@ const Index = (props) => {
                         <div className="mb-3">
                             <Link to="/products/create" className="btn btn-success">Create Product</Link>
                         </div>
+
+                        {alert &&
+                            <Alert variant="danger" onClick={() => setAlert(false)} dismissible>
+                                <b>Product has been deleted successfully!</b>
+                            </Alert>
+                        }
 
                         {error && <p>{error}</p>}
                         {isLoading && <h2 className="text-center">Loading...</h2>}
@@ -107,7 +135,7 @@ const Index = (props) => {
                                         <td>
                                             <ButtonGroup aria-label="Basic example">
                                                 <Link to={`/products/${product.id}/edit`} className="btn btn-sm btn-info">Edit</Link>
-                                                <Button variant="danger" className="float-right" size="sm" type="submit" onClick={() => handleDelete(product.id)}>Delete</Button>
+                                                <Button variant="danger" className="float-right" size="sm" type="submit" onClick={() => showAlert(product.id)}>Delete</Button>
                                             </ButtonGroup>
                                         </td>
                                     </tr>
