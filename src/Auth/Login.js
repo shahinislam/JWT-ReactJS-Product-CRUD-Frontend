@@ -1,7 +1,6 @@
-import { Button, Card, Form } from 'react-bootstrap';
+import { Button, Card, Form, Alert } from 'react-bootstrap';
 import { Link, useHistory } from "react-router-dom";
 import { useState } from "react";
-import Alert from 'react-bootstrap/Alert'
 
 const Login = () => {
 
@@ -19,9 +18,10 @@ const Login = () => {
 
         if (form.checkValidity() === false) {
             event.stopPropagation();
+            setValidated(true);
+            return false;
         }
 
-        setValidated(true);
 
         const login = { email, password };
 
@@ -69,7 +69,7 @@ const Login = () => {
                             <Form.Label>Email address</Form.Label>
                             <Form.Control
                                 type="email"
-                                placeholder="Enter email"
+                                placeholder="email@email.com"
                                 required
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}

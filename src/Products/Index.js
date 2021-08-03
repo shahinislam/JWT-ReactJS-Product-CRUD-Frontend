@@ -1,18 +1,18 @@
 import { Button, Table, ButtonGroup } from 'react-bootstrap';
 import Alert from 'react-bootstrap/Alert'
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import Navigation from "../Navigation";
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
 
-const Index = (props) => {
+const Index = () => {
 
     const [products, setProducts] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [alert, setAlert] = useState(false);
-    const userName = props.userName;
+    const history = useHistory();
 
     const getData = () => {
 
@@ -30,12 +30,14 @@ const Index = (props) => {
             },
         })
             .then(res => {
-                if (!res.ok) {
-                    throw Error('Could not fetch data from the resource.');
-                }
                 return res.json();
             })
             .then(result => {
+                // console.log(result);
+                if(result.message === 'Unauthenticated.')
+                {
+                    history.push('/');
+                }
                 setProducts(result);
                 setIsLoading(false);
                 setError(null);
@@ -62,9 +64,18 @@ const Index = (props) => {
     }, []);
 
     const handleDelete = (productId) => {
+
+        const token = localStorage.getItem('token');
+
         fetch('http://127.0.0.1:8000/api/products/' + productId, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: {
+                "Authorization": "Bearer " + token
+            },
         })
+            .then(res => {
+                return res;
+            })
             .then((res) => {
                 console.log(res);
                 getData();
@@ -92,7 +103,7 @@ const Index = (props) => {
     return (
         <div className="index">
 
-            <Navigation userName={userName} />
+            <Navigation />
 
             <div className="container">
                 <div className="mb-5">

@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
-import { Button, Card, Form } from 'react-bootstrap';
+import { Button, Card, Form, Alert } from 'react-bootstrap';
 
 const Register = () => {
+
+    const [alert, setAlert] = useState(null);
     const [validated, setValidated] = useState(false);
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
@@ -15,11 +17,15 @@ const Register = () => {
         const form = event.currentTarget;
 
         event.preventDefault();
-        if (form.checkValidity() === false) {
-            event.stopPropagation();
-        }
 
-        setValidated(true);
+        if (form.checkValidity() === false || password !== password_confirmation) {
+
+            event.stopPropagation();
+
+            setValidated(true);
+
+            return false;
+        }
 
         const register = { name, email, password, password_confirmation };
 
@@ -38,6 +44,8 @@ const Register = () => {
                 if (result.user) {
                     history.push('/');
                 }
+
+                setAlert(result);
             });
     };
 
@@ -48,6 +56,17 @@ const Register = () => {
             <Card className="col-md-4 offset-md-4 mt-5">
                 <Card.Body>
                     <Card.Title className="h1 text-center">Create New Account</Card.Title>
+
+                    {alert &&
+                        <Alert variant="danger" onClick={() => setAlert(null)} dismissible>
+                            <b>
+                                {alert.name && <li>{alert.name}</li>}
+                                {alert.email && <li>{alert.email}</li>}
+                                {alert.password && <li>{alert.password}</li>}
+                            </b>
+                        </Alert>
+                    }
+
                     <Form noValidate validated={validated} onSubmit={handleSubmit}>
                         <Form.Group className="mb-3" controlId="formBasicName">
                             <Form.Label>Name</Form.Label>
@@ -67,7 +86,7 @@ const Register = () => {
                             <Form.Label>Email address</Form.Label>
                             <Form.Control
                                 type="email"
-                                placeholder="Enter email"
+                                placeholder="email@email.com"
                                 required
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
@@ -98,8 +117,11 @@ const Register = () => {
                                 required
                                 value={password_confirmation}
                                 onChange={(e) => setPasswordConfirmation(e.target.value)}
+                                isInvalid={password !== password_confirmation}
                             />
-
+                            <Form.Control.Feedback type="invalid">
+                                Password did not matched
+                            </Form.Control.Feedback>
                         </Form.Group>
 
                         <div className="d-grid gap-2">

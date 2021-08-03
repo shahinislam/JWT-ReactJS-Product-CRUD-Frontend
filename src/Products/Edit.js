@@ -4,9 +4,8 @@ import { Form, Button, Card, Row, Col } from 'react-bootstrap';
 import Image from 'react-bootstrap/Image'
 import Navigation from "../Navigation";
 
-const Edit = (props) => {
+const Edit = () => {
 
-    const userName = props.userName;
     const { id } = useParams();
     const [validated, setValidated] = useState(false);
     const [title, setTitle] = useState('');
@@ -14,6 +13,7 @@ const Edit = (props) => {
     const [price, setPrice] = useState('');
     const [image, setImage] = useState('');
     const [oldImage, setOldImage] = useState('');
+    const [imageError, setImageError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const history = useHistory();
 
@@ -42,10 +42,13 @@ const Edit = (props) => {
         const form = event.currentTarget;
 
         if (form.checkValidity() === false) {
-            event.stopPropagation();
-        }
 
-        setValidated(true);
+            event.stopPropagation();
+
+            setValidated(true);
+
+            return false;
+        }
 
         const formData = new FormData();
 
@@ -57,32 +60,34 @@ const Edit = (props) => {
 
         setIsLoading(true);
 
+        const token = localStorage.getItem('token');
+
         fetch('http://127.0.0.1:8000/api/products/' + id, {
             method: 'POST',
-            // headers: { '_method': 'PATCH', },
+            headers: { Authorization: 'Bearer' + token, },
             body: formData,
         })
             .then(res => {
-                if (!res.ok) {
-                    throw Error('Please input valid string.');
-                }
                 return res.json();
             })
-            .then(() => {
+            .then((result) => {
+
+                console.log(result);
+
+                if (result.success) {
+                    history.goBack();
+                }
+
+                setImageError(result.image);
+
                 setIsLoading(false);
-                console.log('Post Updated');
-                history.push('/products');
-            })
-            .catch((error) => {
-                setIsLoading(false);
-                console.log(error);
             })
     }
 
     return (
         <div className="edit">
 
-            <Navigation userName={userName} />
+            <Navigation />
 
             <div className="d-flex justify-content-center">
                 <div className="col-md-6">
@@ -101,6 +106,9 @@ const Edit = (props) => {
                                         value={title}
                                         onChange={(e) => setTitle(e.target.value)}
                                     />
+                                    <Form.Control.Feedback type="invalid">
+                                        This field is required
+                                    </Form.Control.Feedback>
                                 </Form.Group>
 
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
@@ -112,6 +120,9 @@ const Edit = (props) => {
                                         value={description}
                                         onChange={(e) => setDescription(e.target.value)}
                                     />
+                                    <Form.Control.Feedback type="invalid">
+                                        This field is required
+                                    </Form.Control.Feedback>
                                 </Form.Group>
 
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput2">
@@ -123,15 +134,18 @@ const Edit = (props) => {
                                         value={price}
                                         onChange={(e) => setPrice(e.target.value)}
                                     />
+                                    <Form.Control.Feedback type="invalid">
+                                        This field is required
+                                    </Form.Control.Feedback>
                                 </Form.Group>
 
-                                <Row className="mb-3">
-                                    <Col xs={6} md={4}>
-                                        {oldImage &&
+                                {oldImage &&
+                                    <Row className="mb-3">
+                                        <Col xs={6} md={4}>
                                             <Image width="200" src={`http://127.0.0.1:8000/storage/${oldImage}`} rounded />
-                                        }
-                                    </Col>
-                                </Row>
+                                        </Col>
+                                    </Row>
+                                }
 
                                 <Form.Group controlId="formFile" className="mb-3">
                                     <Form.Label>Image</Form.Label>
@@ -139,7 +153,11 @@ const Edit = (props) => {
                                         type="file"
                                         placeholder="Image"
                                         onChange={(e) => setImage(e.target.files[0])}
+                                        isInvalid={imageError ? true : false}
                                     />
+                                    <Form.Control.Feedback type="invalid">
+                                        {imageError}
+                                    </Form.Control.Feedback>
                                 </Form.Group>
 
                                 {!isLoading &&

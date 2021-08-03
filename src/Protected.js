@@ -1,11 +1,10 @@
 import { useHistory } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 const Protected = (props) => {
 
     const Component = props.Component;
     const history = useHistory();
-    const [userName, setUserName] = useState('');
 
     useEffect(() => {
 
@@ -22,18 +21,14 @@ const Protected = (props) => {
                 },
             })
                 .then(res => {
+                    return res.json();
+                })
+                .then(result => {
+                    console.log(result);
 
-                    res.json().then((result) => {
-
-                        console.log(result);
-
-                        if (result.message === 'Unauthenticated.') {
-                            history.push('/');
-                        }
-                        else {
-                            setUserName(result.name);
-                        }
-                    });
+                    if (result.message === 'Unauthenticated.') {
+                        history.push('/');
+                    }
                 })
         }
 
@@ -41,11 +36,11 @@ const Protected = (props) => {
             history.push('/');
         }
 
-    }, [])
+    }, []);
 
     return (
         <div className="protected">
-            <Component userName={userName} />
+            <Component />
         </div>
     );
 }

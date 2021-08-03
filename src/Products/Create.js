@@ -1,17 +1,18 @@
 import { Button, Card, Form } from 'react-bootstrap';
-import { useState } from "react";
+import { useState, Component } from "react";
 import { useHistory } from "react-router-dom";
 import Navigation from '../Navigation';
 
-const Create = (props) => {
+const Create = () => {
 
-    const userName = props.userName;
     const [validated, setValidated] = useState(false);
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [price, setPrice] = useState('');
     const [image, setImage] = useState('');
+    const [imageError, setImageError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [sweet, setSweet] = useState(false);
     const history = useHistory();
 
     const handleSubmit = (event) => {
@@ -20,12 +21,15 @@ const Create = (props) => {
         const form = event.currentTarget;
 
         if (form.checkValidity() === false) {
+
             event.stopPropagation();
+
+            setValidated(true);
+
+            return false;
         }
 
-        setValidated(true);
-
-        console.warn(title, description, price, image);
+        // console.warn(title, description, price, image);
 
         setIsLoading(true);
 
@@ -44,19 +48,18 @@ const Create = (props) => {
             body: formData,
         })
             .then(res => {
-                if ( ! res.ok) {
-                    throw Error('Please input valid string.');
-                }
                 return res.json();
             })
             .then((result) => {
-                console.log('New Product created');
-                alert('Product Added Successfully!');
-                setIsLoading(false);
-                history.push('/products');
-            })
-            .catch((error) => {
-                console.log(error);
+
+                console.log(result);
+
+                if (result.success) {
+                    history.push('/products');
+                }
+
+                setImageError(result.image);
+
                 setIsLoading(false);
             })
     }
@@ -64,7 +67,7 @@ const Create = (props) => {
     return (
         <div className="create">
 
-            <Navigation userName={userName} />
+            <Navigation />
 
             <div className="d-flex justify-content-center">
                 <div className="col-md-6">
@@ -72,6 +75,7 @@ const Create = (props) => {
                         <Card.Title className="text-center">
                             <h1>Create Product</h1>
                         </Card.Title>
+                        
                         <Card.Body>
                             <Form noValidate validated={validated} onSubmit={handleSubmit}>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
@@ -83,6 +87,9 @@ const Create = (props) => {
                                         value={title}
                                         onChange={(e) => setTitle(e.target.value)}
                                     />
+                                    <Form.Control.Feedback type="invalid">
+                                        This field is required
+                                    </Form.Control.Feedback>
                                 </Form.Group>
 
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
@@ -94,6 +101,9 @@ const Create = (props) => {
                                         value={description}
                                         onChange={(e) => setDescription(e.target.value)}
                                     />
+                                    <Form.Control.Feedback type="invalid">
+                                        This field is required
+                                    </Form.Control.Feedback>
                                 </Form.Group>
 
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput2">
@@ -105,6 +115,9 @@ const Create = (props) => {
                                         value={price}
                                         onChange={(e) => setPrice(e.target.value)}
                                     />
+                                    <Form.Control.Feedback type="invalid">
+                                        This field is required
+                                    </Form.Control.Feedback>
                                 </Form.Group>
 
                                 <Form.Group controlId="formFile" className="mb-3">
@@ -113,7 +126,11 @@ const Create = (props) => {
                                         type="file"
                                         placeholder="Image"
                                         onChange={(e) => setImage(e.target.files[0])}
+                                        isInvalid={imageError ? true : false}
                                     />
+                                    <Form.Control.Feedback type="invalid">
+                                        {imageError}
+                                    </Form.Control.Feedback>
                                 </Form.Group>
 
                                 {!isLoading &&
